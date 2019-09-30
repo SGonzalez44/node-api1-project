@@ -1,110 +1,107 @@
-// implement your API here
 const express = require('express');
 
-const users = require('./data/db');
+const Users = require('./data/db.js');
 
 const server = express();
 
 server.use(express.json());
 
 server.post('/api/users', (req, res) => {
-  const userData = req.body;
+  const { name, bio } = req.body;
 
-  if (!userData.name || !userData.bio) {
+  if (!name || !bio) {
     res
       .status(400)
       .json({ errorMessage: 'Please provide name and bio for the user.' });
   } else {
-    users
-      .insert(userData)
-      .then(user => res.status(201).json(user))
-      .catch(err =>
-        res.status(400).json({
-          error: 'There was an error while saving the user to the database.',
-        }),
-      );
+    Users.insert(req.body)
+      .then(user => {
+        res.status(201).json(user);
+      })
+      .catch(() => {
+        res.status(500).json({
+          errorMessage:
+            'There was an error while saving the user to the database',
+        });
+      });
   }
 });
 
 server.get('/api/users', (req, res) => {
-  users
-    .find()
-    .then(users => res.send(users))
-    .catch(err =>
-      res
-        .status(500)
-        .json({ error: 'The users information could not be retrieved.' }),
-    );
+  Users.find()
+    .then(users => {
+      res.status(200).json(users);
+    })
+    .catch(() => {
+      res.status(500).json({
+        errorMessage: 'The users information could not be retrieved.',
+      });
+    });
 });
 
 server.get('/api/users/:id', (req, res) => {
-  const id = req.params.id;
-
-  users
-    .findById(id)
+  Users.findById(req.params.id)
     .then(user => {
-      if (!user) {
+      if (user) {
+        res.status(200).json(user);
+      } else {
         res
           .status(404)
           .json({ message: 'The user with the specified ID does not exist.' });
-      } else {
-        res.json(user);
       }
     })
-    .catch(err =>
+    .catch(() => {
       res
         .status(500)
-        .json({ error: 'The user information could not be retrieved.' }),
-    );
+        .json({ errorMessage: 'The user information could not be retrieved.' });
+    });
 });
 
 server.delete('/api/users/:id', (req, res) => {
-  const id = req.params.id;
-
-  users
-    .remove(id)
-    .then(user => {
-      if (!user) {
+  Users.remove(req.params.id)
+    .then(count => {
+      if (count && count > 0) {
+        res.status(200).json({
+          message: 'the user was deleted.',
+        });
+      } else {
         res
           .status(404)
           .json({ message: 'The user with the specified ID does not exist.' });
-      } else {
-        res.json(user);
       }
     })
-    .catch(err =>
-      res.status(500).json({ error: 'The user could not be removed.' }),
-    );
+    .catch(() => {
+      res.status(500).json({ errorMessage: 'The user could not be removed' });
+    });
 });
 
 server.put('/api/users/:id', (req, res) => {
-  const id = req.params.id;
-  const changes = req.body;
+  const { name, bio } = req.body;
 
-  if (!changes.name || !changes.bio) {
+  if (!name || !bio) {
     res
       .status(400)
       .json({ errorMessage: 'Please provide name and bio for the user.' });
   } else {
-    users
-      .update(id, changes)
+    Users.update(req.params.id, req.body)
       .then(user => {
-        if (!user) {
-          res.status(404).json({
-            message: 'ID npt valid.',
-          });
-        } else {
+        if (user) {
           res.status(200).json(user);
+        } else {
+          res
+            .status(404)
+            .json({
+              message: 'The user with the specified ID does not exist.',
+            });
         }
       })
-      .catch(err =>
-        res
-          .status(500)
-          .json({ error: 'Sorry no tortillas' }),
-      );
+      .catch(() => {
+        res.status(500).json({
+          errorMessage: 'The user information could not be modified.',
+        });
+      });
   }
 });
 
-const port = 4400;
-
-server.listen(port, () => console.log(`\n Listening on port ${port} \n`));
+const port = 5000;
+server.listen(port, () => console.log(`\n*** API on port ${port} ***\n`));
