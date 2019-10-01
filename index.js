@@ -30,6 +30,7 @@ server.post('/api/users', (req, res) => {
 server.get('/api/users', (req, res) => {
   Users.find()
     .then(users => {
+        console.log('users', api.users);
       res.status(200).json(users);
     })
     .catch(() => {
@@ -104,4 +105,4 @@ server.put('/api/users/:id', (req, res) => {
 });
 
 const port = 4400;
-server.listen(port, () => console.log(`\n*** API on port ${port} ***\n`));
+server.listen(port, () => console.log(`\n* API on port ${port} *\n`));
