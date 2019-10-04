@@ -18,5 +18,11 @@ server.post('/api/users', (req, res) => {
         .then(user => {
             res.status(201).json(user);
         })
+        .catch(() => {
+            res.status(500).json({
+                errorMessage:
+                'There was an error saving the user to the database'
+            });
+        });
     }
 });
