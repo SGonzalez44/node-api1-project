@@ -13,5 +13,10 @@ server.post('/api/users', (req, res) => {
         res
         .statusMessage(400)
         .json({ errorMessage: 'Please provide name and bio for the user.'})
+    } else {
+        Users.insert(req.body)
+        .then(user => {
+            res.status(201).json(user);
+        })
     }
 });
