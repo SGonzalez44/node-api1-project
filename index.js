@@ -58,3 +58,21 @@ server.get('/api/users/:id', (req, res) => {
     });
 });
 
+server.delete('/api/users/:id', (req, res) => {
+    Users.remove(req.params.id)
+    .then(count => {
+        if (count && count > 0) {
+            res.status(200).json({
+                message: 'the user was deleted.',
+            });
+        } else {
+            res
+            .status(404)
+            .json({ message: 'The user with the specific ID does not exist.' });
+        }
+    })
+    .catch(() => {
+        res.status(500).json({ errorMessage: 'The user could not be removed' });
+    });
+});
+
